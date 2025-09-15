@@ -6,6 +6,7 @@ type Message = {
   id: number;
   text: string;
   sender: "user" | "bot";
+  timestamp: string;
 };
 
 export default function Chat() {
@@ -14,6 +15,10 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
 
@@ -21,6 +26,7 @@ export default function Chat() {
       id: Date.now(),
       text: input,
       sender: "user",
+      timestamp: formatTime(new Date()),
     };
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
@@ -34,6 +40,7 @@ export default function Chat() {
           id: Date.now() + 1,
           text: "Got it! (mock bot reply)",
           sender: "bot",
+          timestamp: formatTime(new Date()),
         },
       ]);
       setIsTyping(false);
@@ -51,29 +58,35 @@ export default function Chat() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-end ${
-              msg.sender === "user" ? "justify-end" : "justify-start"
+            className={`flex flex-col ${
+              msg.sender === "user" ? "items-end" : "items-start"
             }`}
           >
-            {msg.sender === "bot" && (
-              <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white mr-2">
-                🤖
+            <div className="flex items-end">
+              {msg.sender === "bot" && (
+                <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white mr-2">
+                  🤖
+                </div>
+              )}
+              <div
+                className={`px-4 py-2 rounded-2xl max-w-[75%] shadow ${
+                  msg.sender === "user"
+                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                    : "bg-gray-200 text-gray-900"
+                }`}
+              >
+                {msg.text}
               </div>
-            )}
-            <div
-              className={`px-4 py-2 rounded-2xl max-w-[75%] shadow ${
-                msg.sender === "user"
-                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                  : "bg-gray-200 text-gray-900"
-              }`}
-            >
-              {msg.text}
+              {msg.sender === "user" && (
+                <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white ml-2">
+                  😊
+                </div>
+              )}
             </div>
-            {msg.sender === "user" && (
-              <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white ml-2">
-                😊
-              </div>
-            )}
+            {/* Timestamp */}
+            <span className="text-xs text-gray-400 mt-1 px-2">
+              {msg.timestamp}
+            </span>
           </div>
         ))}
         {isTyping && (
