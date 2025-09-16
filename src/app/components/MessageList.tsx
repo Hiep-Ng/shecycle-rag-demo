@@ -1,13 +1,21 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useChat } from "@/app/context/ChatContext";
 import { Message } from "@/app/types/message";
 import { Avatar } from "@mui/material"; // or replace with your own icon/img
 
 export default function MessageList() {
   const { messages } = useChat();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Simple date formatter like in chat.tsx
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const formatDate = (dateValue: string | number) => {
     const date = new Date(dateValue);
     return date.toLocaleDateString(undefined, {
@@ -22,7 +30,6 @@ export default function MessageList() {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Group messages by day
   const groupedMessages = messages.reduce(
     (groups: Record<string, Message[]>, msg) => {
       const day = new Date(msg.timestamp).toDateString();
@@ -34,7 +41,10 @@ export default function MessageList() {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4 overflow-y-auto h-[70vh] bg-gray-50 rounded-lg">
+    <div
+      ref={containerRef}
+      className="flex flex-col gap-4 p-4 pb-3 overflow-y-auto h-[70vh] bg-gray-50 rounded-lg"
+    >
       {Object.entries(groupedMessages).map(([day, dayMessages]) => (
         <div key={day}>
           {/* Date separator */}
