@@ -25,6 +25,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     };
     setMessages((prev) => [...prev, userMsg]);
 
+    const typingId = crypto.randomUUID();
+    const typingMsg: Message = {
+      id: typingId,
+      sender: "bot",
+      type: "typing",
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, typingMsg]);
+
     try {
       // 2. Call backend API (/api/chat) -> Ollama
       const res = await fetch("/api/chat", {
@@ -44,6 +53,19 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, botMsg]);
+
+      // 4. 🔑 Nếu bot trả lời có nhắc tới "nhập liệu"
+      if (data.reply && data.reply.toLowerCase().includes("nhập liệu")) {
+        const actionMsg: Message = {
+          id: crypto.randomUUID(),
+          sender: "bot",
+          type: "action",
+          action: "openCamera",
+          label: "📷 Mở Camera",
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, actionMsg]);
+      }
     } catch (err) {
       console.error("Error calling LLM:", err);
       const botMsg: Message = {

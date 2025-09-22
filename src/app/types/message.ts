@@ -15,4 +15,9 @@ export type ActionMessage = BaseMessage & {
   label: string;
 };
 
-export type Message = TextMessage | ActionMessage;
+// Add typing message
+export type TypingMessage = BaseMessage & {
+  type: "typing";
+};
+
+export type Message = TextMessage | ActionMessage | TypingMessage;

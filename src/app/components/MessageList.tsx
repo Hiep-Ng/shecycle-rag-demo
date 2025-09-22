@@ -2,8 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { useChat } from "@/app/context/ChatContext";
-import { Message } from "@/app/types/message";
+import { ActionMessage, Message } from "@/app/types/message";
 import { Avatar } from "@mui/material"; // or replace with your own icon/img
+import { Button } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
 
 export default function MessageList() {
   const { messages } = useChat();
@@ -40,6 +42,18 @@ export default function MessageList() {
     {}
   );
 
+  const handleAction = (msg: ActionMessage) => {
+    switch (msg.action) {
+      case "openCamera":
+        console.log("📸 Opening camera…");
+        // simplest version: trigger hidden <input type="file" capture="environment" />
+        document.getElementById("cameraInput")?.click();
+        break;
+      default:
+        console.warn("Unknown action:", msg.action);
+    }
+  };
+
   return (
     <div
       ref={containerRef}
@@ -73,10 +87,39 @@ export default function MessageList() {
               >
                 {msg.type === "text" && <span>{msg.content}</span>}
 
-                {msg.type === "action" && (
-                  <button className="px-3 py-1 bg-green-500 text-white rounded">
-                    {msg.label}
-                  </button>
+                {msg.type === "typing" && (
+                  <div className="flex gap-1 items-center">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                  </div>
+                )}
+
+                {msg.type === "action" && msg.action === "openCamera" && (
+                  <label htmlFor={`cameraInput-${msg.id}`}>
+                    <input
+                      id={`cameraInput-${msg.id}`}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          console.log("📷 Got photo:", file);
+                          // TODO: push to context as a new message
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      component="span"
+                      color="success"
+                      startIcon={<PhotoCamera />}
+                    >
+                      {msg.label}
+                    </Button>
+                  </label>
                 )}
 
                 {/* Timestamp */}
