@@ -44,6 +44,9 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
       const data = await res.json();
 
+      // 4️⃣ Remove typing message
+      setMessages((prev) => prev.filter((m) => m.id !== typingId));
+
       // 3. Add bot message
       const botMsg: Message = {
         id: crypto.randomUUID(),
